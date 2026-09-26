@@ -1,4 +1,4 @@
-Required Notice: Copyright 2026 PierreTzt (https://github.com/PierreTzt)
+Required Notice: Copyright 2026 Pierre Touzet (https://github.com/PierreTzt)
 
 # PolyForm Noncommercial License 1.0.0
 

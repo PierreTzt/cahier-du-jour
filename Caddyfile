@@ -1,0 +1,71 @@
+# Caddy obtient et renouvelle le certificat tout seul, à condition que le
+# domaine pointe déjà vers le VPS et que les ports 80 et 443 soient ouverts.
+# C'est la seule raison pour laquelle il est là plutôt que nginx : un
+# certificat qui expire un dimanche de février est exactement le genre de
+# panne que personne ici ne saurait réparer.
+
+{$DOMAINE} {
+	# Tant qu'on est sur le nom d'hôte du VPS, `tls internal` : Caddy signe
+	# lui-même. Let's Encrypt refuserait de toute façon — `ovh.net` n'est pas
+	# dans la Public Suffix List, donc tous les `*.vps.ovh.net` de tous les
+	# clients OVH partagent le même quota de certificats, et il est presque
+	# toujours épuisé.
+	#
+	# Avec un vrai domaine, vider CADDY_TLS dans .env : Caddy obtient et
+	# renouvelle le certificat tout seul. Pas de donnée réelle avant ce
+	# moment-là.
+	{$CADDY_TLS}
+
+	encode zstd gzip
+
+	# Une seule adresse : `www` renvoie vers l'apex. Les sessions sont posées
+	# par hôte ; un parent entré par `www` et un lien ouvert sans lui ne
+	# partageaient pas la même.
+	@www header_regexp www Host ^www\.(.+)$
+	redir @www https://{re.www.1}{uri} permanent
+
+	# Pendant les quelques secondes où l'application redémarre, Caddy rendait
+	# une page vide — sur la tablette, « HTTP ERROR 502 », et plus aucun
+	# JavaScript pour réessayer (seconde critique du 16 septembre). Une page
+	# sur son papier, qui se recharge d'elle-même.
+	handle_errors 502 503 504 {
+		header Content-Type "text/html; charset=utf-8"
+		header Cache-Control "no-store"
+		header Retry-After "5"
+		# Pas d'accolade dans la page : Caddy les lirait comme des variables.
+		respond `<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex"><meta http-equiv="refresh" content="5"><title>Le cahier du jour</title></head>
+<body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#f6f1e7;color:#1d2836;font:1.125rem/1.6 Georgia,serif;padding:1.5rem;box-sizing:border-box">
+<main><p style="margin:0">Un instant.</p><p style="margin:.25rem 0 0;color:#4d5a6a;font-size:1rem">Le cahier revient tout seul dans quelques secondes.</p></main>
+</body></html>` 503
+	}
+
+	header {
+		# Ce site n'a rien à faire dans un moteur de recherche. Le prénom d'un
+		# enfant et le déroulé de ses journées ne sont pas des données publiques.
+		X-Robots-Tag "noindex, nofollow, noarchive"
+
+		# Une fois en HTTPS, on n'en ressort pas.
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+
+		# Rien de cette application n'a de raison d'être encadré ailleurs.
+		X-Frame-Options "DENY"
+
+		# Aucune de ces permissions n'est utilisée.
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+
+		-Server
+	}
+
+	reverse_proxy application:3000 {
+		# X-Forwarded-For est un en-tête que le client peut écrire. Sans cette
+		# ligne, n'importe qui peut en envoyer un faux et le faire varier pour
+		# échapper au ralentissement anti-force-brute. Caddy l'écrase par
+		# l'adresse réelle du pair, qui ne se falsifie pas.
+		header_up X-Forwarded-For {remote_host}
+	}
+}

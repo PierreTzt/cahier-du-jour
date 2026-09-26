@@ -1,0 +1,84 @@
+# Le cahier — la pile complète, sur un seul VPS.
+#
+# Trois conteneurs : la base, l'application, et Caddy devant pour le TLS.
+# Dimensionné pour un VPS-1 (2 vCore, 4 Go) : en fonctionnement l'ensemble
+# tient sous 700 Mo, soit un sixième de la machine.
+#
+# Rien n'est exposé sur l'Internet sauf Caddy. La base n'a aucun port publié :
+# elle n'est joignable que depuis le réseau interne de la pile, ce qui évite
+# la faute classique du Postgres ouvert sur le port 5432.
+
+services:
+  base:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-cahier}
+      POSTGRES_USER: ${POSTGRES_USER:-cahier}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?mot de passe de la base manquant}
+      # Les journées, les questions et le journal sont en français ; le tri
+      # alphabétique doit l'être aussi.
+      LANG: fr_FR.utf8
+    volumes:
+      - donnees-base:/var/lib/postgresql/data
+    # Les valeurs par défaut de Postgres visent une machine partagée ; ici on
+    # sait qu'on a 4 Go et quatre utilisateurs.
+    command:
+      - postgres
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - effective_cache_size=1GB
+      - -c
+      - max_connections=40
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cahier} -d ${POSTGRES_DB:-cahier}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  application:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-cahier}:${POSTGRES_PASSWORD}@base:5432/${POSTGRES_DB:-cahier}
+      NODE_ENV: production
+    depends_on:
+      base:
+        # On attend que la base réponde vraiment, pas seulement que le
+        # conteneur soit lancé : sans ça le premier démarrage échoue une fois
+        # sur deux, et redémarre en boucle assez longtemps pour inquiéter.
+        condition: service_healthy
+    expose:
+      - "3000"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # Une ou plusieurs adresses séparées par des virgules : Caddy sait
+      # servir l'apex et le www d'un seul bloc.
+      DOMAINE: ${DOMAINE:?nom de domaine manquant}
+      # « tls internal » tant qu'on est sur le nom d'hôte du VPS ;
+      # à vider le jour où un vrai domaine pointe vers la machine.
+      CADDY_TLS: ${CADDY_TLS-}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Les certificats obtenus survivent aux redémarrages : sans ce volume,
+      # chaque relance redemande un certificat et on finit par se faire
+      # limiter par Let's Encrypt.
+      - caddy-donnees:/data
+      - caddy-config:/config
+    depends_on:
+      - application
+
+volumes:
+  donnees-base:
+  caddy-donnees:
+  caddy-config:

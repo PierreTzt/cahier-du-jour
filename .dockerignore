@@ -1,0 +1,20 @@
+# Ce qui n'a rien à faire dans l'image, pour la taille comme pour la sécurité.
+node_modules
+.next
+.git
+.github
+.vercel
+.claude
+.impeccable
+docs
+test
+*.md
+!README.md
+.env
+.env.*
+Dockerfile
+docker-compose.yml
+Caddyfile
+deploiement
+npm-debug.log*
+*.tsbuildinfo

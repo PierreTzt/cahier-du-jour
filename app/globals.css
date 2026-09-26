@@ -1,0 +1,373 @@
+@import "tailwindcss";
+
+@theme {
+  /* Papier & encre */
+  --color-papier: #e8edf2;
+  /* Le papier de l'enfant. Un vrai cahier Seyès, c'est de la réglure
+     bleu-violet sur du papier crème — réchauffer son côté le rapproche de
+     l'objet réel au lieu de l'en éloigner. Tous les contrastes y gagnent :
+     4,87:1 au pire contre 4,65 sur le papier froid, vérifié au calcul. */
+  --color-papier-chaud: #f6f1e8;
+  --color-feuille: #fcfdfe;
+  --color-encre: #1d2836;
+  --color-encre-douce: #4d5a6a;
+  --color-encre-tenue: #5c6a7a;
+  --color-reglure: #b9c8de;
+
+  /* Crayons de couleur — une teinte par matière */
+  --color-bleu: #47699a;
+  --color-ocre: #8a6026;
+  --color-sauge: #4e7050;
+  --color-prune: #7a5a84;
+  --color-sarcelle: #387275;
+  /* Deux teintes de plus : la géographie et les arts, séparées de l'histoire
+     et du français le jour où le programme a cessé d'être un mot dans une
+     case. Contrastes calculés sur les trois fonds avant d'être retenues :
+     terre 5,33:1 / 5,58 / 6,17 — framboise 5,50 / 5,76 / 6,36. */
+  --color-terre: #8a5323;
+  --color-framboise: #9a3f5d;
+  --color-fini: #45724d;
+
+  /* Le côté des adultes — un bureau, pas un cahier.
+     La réglure est la métaphore du cahier de l’enfant. Sur un tableau de bord
+     dense elle devient du bruit, et le parrain l'a dit : « le fond est bon, la
+     forme ne va pas du tout ». Les écrans d'adulte ont donc leur propre sol,
+     neutre, sans lignes, avec des cartes blanches et des bordures qu'on voit.
+
+     Les contrastes sont mesurés sur la page rendue, pas estimés. Le pire texte
+     est à 4,76:1 sur le sol, au-dessus du plancher de 4,5.
+
+     Les bordures ont demandé deux passes. L'ancienne était à 1,31:1 sur le
+     fond — invisible, d'où l'impression de délavé. Ma première correction l'a
+     mise à 1,61:1, ce qui ne réglait rien : je l'avais estimée au lieu de la
+     calculer. Deux tons, maintenant, et une règle :
+
+       `bord`      2,36:1 sur le sol — les traits qui séparent. Un séparateur
+                   n'est pas une commande : il doit se voir, pas se réclamer.
+       `bord-fort` 3,09:1 sur le sol, 3,59:1 sur blanc — **le contour de tout
+                   ce qui se clique**. C'est ce contour qui dit qu'un bouton
+                   est un bouton, donc c'est lui qui doit tenir le 3:1. */
+  --color-bureau: #eceef1;
+  --color-carte: #ffffff;
+  --color-bord: #939daa;
+  --color-bord-fort: #7e8896;
+
+  /* La pastille de la cloche, sur le bandeau sombre : un ocre clair, parce
+     que ce qui est à reprendre n'est pas une faute (règle n° 4, aucun rouge). */
+  --color-miel: #f1d39a;
+
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-atkinson);
+
+  --radius-feuille: 14px;
+
+  /* Les noms qu'attendent les composants shadcn/ui (`components/ui/`),
+     raccordés à la palette du cahier plutôt qu'à la leur : pas de thème
+     sombre, pas de Geist, et `destructive` en ocre — aucun rouge, nulle part
+     (règle n° 4). Ajoutés le 21 septembre 2026 ; rien d'autre ne les utilise. */
+  --color-background: var(--color-carte);
+  --color-foreground: var(--color-encre);
+  --color-muted: var(--color-bureau);
+  --color-muted-foreground: var(--color-encre-tenue);
+  --color-accent: var(--color-bureau);
+  --color-accent-foreground: var(--color-encre);
+  --color-popover: var(--color-carte);
+  --color-popover-foreground: var(--color-encre);
+  --color-border: var(--color-bord);
+  --color-input: var(--color-bord-fort);
+  --color-ring: var(--color-encre);
+  --color-destructive: var(--color-ocre);
+}
+
+/* Un seul look, assumé. Pas de thème sombre. */
+:root {
+  color-scheme: light;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  /* La gouttière est réservée en permanence : sans ça, l'apparition de
+     l'ascenseur sur les pages longues retire 15 px et fait passer le menu
+     à la ligne d'une page à l'autre. */
+  scrollbar-gutter: stable;
+}
+
+body {
+  background-color: var(--color-papier);
+  color: var(--color-encre);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-synthesis-weight: none;
+}
+
+/* ---- Le quadrillage Seyès ----
+   Le même dispositif partout : une texture presque invisible chez l’enfant,
+   une véritable réglure de données côté père. --force-reglure règle le registre. */
+.reglure::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: var(--force-reglure, 0.42);
+  background-image:
+    repeating-linear-gradient(to bottom, var(--color-reglure) 0 1px, transparent 1px 32px),
+    repeating-linear-gradient(to bottom, color-mix(in oklab, var(--color-reglure) 55%, transparent) 0 1px, transparent 1px 8px),
+    repeating-linear-gradient(to right, color-mix(in oklab, var(--color-reglure) 42%, transparent) 0 1px, transparent 1px 32px);
+  background-position: 0 -1px;
+}
+
+.au-dessus {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---- Le côté de l'enfant ----
+   La sobriété est juste pour les adultes et froide pour un enfant de neuf
+   ans. Plutôt que de saupoudrer de la couleur partout, on pousse la partition
+   qui existe déjà : le registre « deux visages ». Ses écrans réchauffent,
+   ceux des adultes restent un registre.
+
+   Règle qui gouverne tout ce bloc : **la chaleur n'est jamais conditionnelle**.
+   Si l'interface ne s'égayait que les jours où il finit tout, on aurait
+   reconstruit le bon point en couleurs. « C'est fini » et « on arrête là »
+   se ressemblent. */
+.chaleur {
+  background-color: var(--color-papier-chaud);
+}
+
+/* Le trait du chemin, tiré au crayon plutôt qu'à la règle. L'irrégularité
+   vient d'un dégradé répété : rien à charger, et ça suffit à retirer le
+   côté tableur. */
+.trait-crayon {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--color-encre-tenue) 45%, transparent) 0 7px,
+    color-mix(in oklab, var(--color-encre-tenue) 22%, transparent) 7px 13px,
+    color-mix(in oklab, var(--color-encre-tenue) 38%, transparent) 13px 22px
+  );
+}
+
+/* Une pastille de matière qui respire : un halo de sa propre couleur, comme
+   un feutre qui a légèrement bavé sur le papier. */
+.halo {
+  box-shadow: 0 0 0 4px color-mix(in oklab, currentColor 14%, transparent);
+}
+
+/* Petites capitales espacées — le rôle « étiquette » du système */
+.etiquette {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Barre de démo : elle défile, mais sa barre de défilement n'a rien à dire */
+.sans-ascenseur {
+  scrollbar-width: none;
+}
+.sans-ascenseur::-webkit-scrollbar {
+  display: none;
+}
+
+/* Chiffres alignés pour les tableaux du père */
+.chiffres {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Focus visible, partout, sans exception */
+:where(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-encre);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Entrée en scène : le chemin se déplie */
+@keyframes deplier {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.deplier {
+  animation: deplier 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes tracer {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.tracer {
+  transform-origin: top;
+  animation: tracer 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Côté adulte : ce qui se déplie sous le doigt — les gestes d'une séance,
+   les jours où la déplacer, le menu du téléphone. Court, pour dire d'où ça
+   vient, pas pour se faire regarder. */
+@keyframes apparaitre {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.apparaitre {
+  animation: apparaitre 180ms cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+/* Le papier de l'enfant, côté adulte : ce qui vient de lui — ce qu'il a dit
+   de sa journée, ce qu'il a répondu — s'affiche sur son papier crème, avec
+   la réglure de son cahier. Ce que les adultes écrivent reste sur le blanc.
+   On sait qui parle sans lire la signature. */
+.son-papier {
+  /* Une ligne tous les 1,75 rem, à partir du haut du texte : le contenu
+     s'écrit en `leading-[1.75rem]` et se pose sur la réglure, avec un
+     `pt-3.5` qui vaut le décalage. */
+  background-color: var(--color-papier-chaud);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 calc(1.75rem - 1px),
+    color-mix(in oklab, var(--color-reglure) 75%, transparent) calc(1.75rem - 1px) 1.75rem
+  );
+  background-position: 0 0.875rem;
+}
+
+/* Le cours rouvert pendant les exercices : le cahier de leçons qu'on tire à
+   côté de soi, par la droite, sur un voile léger. */
+@keyframes glisser {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.glisser {
+  animation: glisser 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes voiler {
+  from {
+    opacity: 0;
+  }
+}
+
+.voile {
+  animation: voiler 0.25s ease-out both;
+}
+
+/* Le passage qu'il est venu relire : un coup de surligneur sur le titre,
+   comme on montre une ligne du cahier. Le miel, jamais une couleur de
+   jugement. */
+.surligne {
+  background-image: linear-gradient(
+    transparent 14%,
+    color-mix(in oklab, var(--color-miel) 90%, transparent) 14% 90%,
+    transparent 90%
+  );
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  padding: 0 0.2em;
+  margin: 0 -0.2em;
+  border-radius: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deplier,
+  .tracer,
+  .apparaitre,
+  .glisser,
+  .voile {
+    animation: none;
+  }
+}
+
+/* ---- Impression : le relevé doit sortir comme un document, pas comme une page web ---- */
+@media print {
+  .sans-impression {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+  .reglure::before {
+    display: none;
+  }
+  .feuille-imprimable {
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+  a[href]::after {
+    content: "";
+  }
+
+  /* ---- La feuille du relevé ----
+     Tout ce qui l'entoure à l'écran porte `sans-impression` ; ce qui suit ne
+     regarde que la feuille elle-même. */
+
+  /* Les navigateurs n'impriment pas les fonds par défaut. Sur la bande des
+     douze semaines, ce serait perdre l'information : une journée menée au
+     bout est un carré plein, le demi-remplissage d'une journée arrêtée est un
+     fond — sans eux, les deux deviendraient des contours vides, et la
+     journée arrêtée ressemblerait à une journée ouverte. La propriété
+     s'hérite : elle vaut pour toute la feuille. */
+  .feuille-imprimable {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Un document ne se clique pas : pas de soulignement ni de lien bleu. */
+  .feuille-imprimable a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Pas de ligne seule en haut ou en bas d'une page. */
+  .feuille-imprimable p,
+  .feuille-imprimable li {
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Le repos et les vacances ne se distinguent sur la bande que par leur
+     teinte — bleu clair, gris clair, 1,19:1 l'un contre l'autre. En gris sur
+     une imprimante noir et blanc, plus du tout. Sur la feuille, le repos
+     prend donc des rayures, dans la grille comme dans la légende.
+
+     La case n'a pas de classe d'état à elle : on reconnaît le repos à la
+     classe que `BandeDesJours` lui donne, et c'est la seule forme de la bande
+     à la porter. `test/releve-periode.test.ts` vérifie que ça reste vrai, pour
+     que ces rayures ne disparaissent pas en silence le jour où la forme change. */
+  .feuille-imprimable .bg-reglure {
+    background-image: repeating-linear-gradient(
+      135deg,
+      var(--color-encre-douce) 0 1px,
+      transparent 1px 4px
+    );
+  }
+}
+
+/* A4 en portrait, pour tout ce qui s'imprime : le relevé et la vue du
+   contrôle sont des pièces qu'on remet, sur le papier qu'on a. */
+@page {
+  size: A4 portrait;
+  margin: 15mm;
+}

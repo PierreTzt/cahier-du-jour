@@ -1,0 +1,10 @@
+# Ces fichiers sont lus par Linux, pas par Windows. En CRLF, un script bash
+# échoue avec « bad interpreter: /usr/bin/env bash^M » — sur le VPS, au pire
+# moment. On force donc les fins de ligne Unix, quel que soit le poste.
+*.sh          text eol=lf
+Dockerfile    text eol=lf
+Caddyfile     text eol=lf
+*.yml         text eol=lf
+*.yaml        text eol=lf
+.env.exemple  text eol=lf
+.dockerignore text eol=lf

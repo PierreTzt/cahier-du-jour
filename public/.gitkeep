@@ -1,0 +1,2 @@
+# Ce dossier doit exister après un clone : le Dockerfile le copie dans
+# l'image. Git ne transporte pas les dossiers vides.

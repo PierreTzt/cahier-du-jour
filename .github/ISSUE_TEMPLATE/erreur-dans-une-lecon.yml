@@ -1,0 +1,37 @@
+name: Une erreur dans une leçon, une fiche ou le test
+description: Un corrigé faux, une consigne ambiguë, un mot qu'un enfant lirait comme un reproche.
+title: "[contenu] "
+labels: ["contenu"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci — c'est exactement ce dont le manuel a besoin : il n'a encore été relu par aucun enseignant.
+
+        **Tout ce que vous écrivez ici est public.** N'y mettez jamais le prénom de votre enfant, ni rien de sa santé, de son suivi ou de ce qu'il a écrit.
+  - type: input
+    id: ou
+    attributes:
+      label: Où
+      description: Le titre de la leçon ou de la fiche, ou son code s'il apparaît dans l'adresse (par exemple `/manuel/m-p1-…`).
+    validations:
+      required: true
+  - type: textarea
+    id: quoi
+    attributes:
+      label: Ce qui ne va pas
+      description: Ce qui est écrit, et ce qui devrait l'être. Si vous avez une source (programme officiel, manuel), elle aide beaucoup.
+    validations:
+      required: true
+  - type: dropdown
+    id: sorte
+    attributes:
+      label: Plutôt
+      options:
+        - Un corrigé ou un calcul faux
+        - Une consigne ou une question ambiguë
+        - Une notion qui n'est pas du CM1
+        - Un mot ou un ton qui peut blesser un enfant
+        - Autre chose
+    validations:
+      required: true

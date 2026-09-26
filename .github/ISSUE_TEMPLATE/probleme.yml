@@ -1,0 +1,38 @@
+name: Un problème d'installation ou un bug
+description: Quelque chose qui ne marche pas comme le dit la documentation.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Tout ce que vous écrivez ici est public.** Avant de coller un message d'erreur ou une capture, retirez-en :
+        - le prénom de votre enfant et ceux de la famille ;
+        - votre nom de domaine, l'adresse de votre serveur, vos codes d'accès ;
+        - le contenu de votre fichier `.env`.
+
+        Une question plutôt qu'un bug ? Les [Discussions](https://github.com/PierreTzt/cahier-du-jour/discussions) sont faites pour ça.
+  - type: textarea
+    id: quoi
+    attributes:
+      label: Ce qui se passe
+      description: Ce que vous avez fait, ce que vous attendiez, ce qui s'est passé à la place.
+    validations:
+      required: true
+  - type: dropdown
+    id: ou
+    attributes:
+      label: Où
+      options:
+        - Pendant l'installation
+        - Côté enfant
+        - Côté adulte
+        - Pendant une mise à jour ou une sauvegarde
+    validations:
+      required: true
+  - type: textarea
+    id: journal
+    attributes:
+      label: Message d'erreur (facultatif)
+      description: Par exemple la sortie de `docker compose logs application --tail 50`, **relue avant d'être collée**.
+      render: text

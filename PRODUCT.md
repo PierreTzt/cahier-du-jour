@@ -95,4 +95,4 @@ passe avant la décoration. Atkinson Hyperlegible partout pour le texte.
 - Aucun sens porté par la couleur seule, et jamais de rouge.
 - Côté enfant : aucun compteur, aucun retard visible, la journée tient sur un
   écran sans défiler (1280×900 et 768×1024) — voir les onze règles du
-  `README.md`, qui priment sur tout ce document.
+  `docs/regles.md`, qui priment sur tout ce document.
